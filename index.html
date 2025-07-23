@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frankfurt RP Bewerbung</title>
+    <style>
+        :root {
+            --discord-blurple: #5865F2;
+            --discord-dark: #1e1e2f;
+            --discord-green: #57F287;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--discord-dark);
+            color: white;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 { 
+            color: var(--discord-blurple); 
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-container {
+            background: rgba(30, 31, 34, 0.8);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .form-group { 
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        button {
+            background: var(--discord-blurple);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #4752c4;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+        }
+        .success {
+            background: rgba(87, 242, 135, 0.2);
+            border: 1px solid var(--discord-green);
+            color: var(--discord-green);
+        }
+        .error {
+            background: rgba(237, 66, 69, 0.2);
+            border: 1px solid #ED4245;
+            color: #ED4245;
+        }
+        .notice {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚔 Frankfurt RP Bewerbung</h1>
+    
+    <div class="form-container">
+        <form id="bewerbungsFormular">
+            <div class="form-group">
+                <label for="discordName">Discord Name & Tag*</label>
+                <input type="text" id="discordName" placeholder="DeinName#1234" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="alter">Alter*</label>
+                <input type="number" id="alter" min="16" placeholder="16" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="erfahrung">Deine Roleplay-Erfahrung*</label>
+                <textarea id="erfahrung" placeholder="Wie lange spielst du schon RP? Auf welchen Servern?" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="motivation">Warum möchtest du beitreten?*</label>
+                <textarea id="motivation" placeholder="Was gefällt dir an unserem Server?" required></textarea>
+            </div>
+            
+            <button type="submit">Bewerbung absenden</button>
+        </form>
+        
+        <div id="status"></div>
+    </div>
+    
+    <p class="notice">
+        Bei Problemen kontaktiere uns direkt:<br>
+        E-Mail: <a href="mailto:frankfurtroleplay-support@freenet.de" style="color: #5865F2;">frankfurtroleplay-support@freenet.de</a>
+    </p>
+
+    <script>
+        document.getElementById('bewerbungsFormular').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Dein Discord-Webhook
+            const WEBHOOK_URL = "https://discord.com/api/webhooks/1397685273181028494/J8DD8EGbY1i1zD5Gd1-QajjRg6ORO-Ic6d-PqRnogPGB6k-0h6fGwTNIv2bXyzxxplb4";
+            
+            const discordName = document.getElementById('discordName').value;
+            const alter = document.getElementById('alter').value;
+            const erfahrung = document.getElementById('erfahrung').value;
+            const motivation = document.getElementById('motivation').value;
+            
+            const statusElement = document.getElementById('status');
+            statusElement.style.display = 'none';
+            
+            try {
+                // Sende Daten an Discord
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: "📄 Neue Server-Bewerbung",
+                            description: "Eine neue Bewerbung ist eingegangen!",
+                            color: 0x5865F2,
+                            fields: [
+                                { name: "Discord", value: discordName, inline: true },
+                                { name: "Alter", value: alter, inline: true },
+                                { name: "Erfahrung", value: erfahrung.length > 0 ? erfahrung : "-" },
+                                { name: "Motivation", value: motivation.length > 0 ? motivation : "-" }
+                            ],
+                            timestamp: new Date().toISOString(),
+                            footer: { text: "Frankfurt RP Bewerbungssystem" }
+                        }]
+                    })
+                });
+                
+                if (response.ok) {
+                    statusElement.textContent = "✅ Bewerbung erfolgreich! Wir melden uns bei dir auf Discord.";
+                    statusElement.className = "success";
+                    document.getElementById('bewerbungsFormular').reset();
+                } else {
+                    throw new Error('Webhook fehlgeschlagen');
+                }
+            } catch (error) {
+                console.error("Fehler:", error);
+                statusElement.textContent = "❌ Fehler beim Senden. Bitte sende uns deine Bewerbung per E-Mail an: frankfurtroleplay-support@freenet.de";
+                statusElement.className = "error";
+            }
+            
+            statusElement.style.display = "block";
+            
+            // Nach 10 Sekenden ausblenden
+            setTimeout(() => {
+                statusElement.style.display = "none";
+            }, 10000);
+        });
+    </script>
+</body>
+</html>
